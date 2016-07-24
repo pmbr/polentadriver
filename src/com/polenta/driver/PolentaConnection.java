@@ -2,7 +2,6 @@ package com.polenta.driver;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -27,22 +26,38 @@ public class PolentaConnection {
 		}
 	}
 	
-	public boolean executeStatement(String command) {
+	public PolentaStatement createStatement() {
+		return new PolentaStatement(this);
+	}
+	
+	
+	//public void close()
+	//public void commit()
+	//public void rollback
+	//public void createTransaction
+	//public void setAutoCommit
+	//public void getAutoCommit
+	//public PolentaMetaData getMetaData
+	
+	public BufferedReader writeToSocket(String statement) {
 		if (connected) {
 			try {
 				PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-				out.println(command);
+				out.println(statement);
 				out.flush();
 				System.out.println("Statement sent.");
-				return true;
+				return null;
 			} catch (IOException e) {
 				e.printStackTrace();
-				return false;
+				return null;
 			}
 		} else {
-			return false;
+			return null;
 		}
 		
 	}
-	
+
+	public boolean isConnected() {
+		return this.connected;
+	}
 }
