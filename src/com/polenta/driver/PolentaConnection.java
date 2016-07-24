@@ -30,7 +30,6 @@ public class PolentaConnection {
 		return new PolentaStatement(this);
 	}
 	
-	
 	//public void close()
 	//public void commit()
 	//public void rollback
