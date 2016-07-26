@@ -1,6 +1,5 @@
 package com.polenta.driver;
 
-import java.io.BufferedReader;
 import java.util.List;
 import java.util.Map;
 
@@ -13,12 +12,11 @@ public class PolentaStatement {
 	}
 	
 	public boolean execute(String statement) throws Exception {
-		if (connection.isConnected()) {
-			@SuppressWarnings("unused")
-			BufferedReader reader = connection.writeToSocket(statement);
+		String response = connection.writeToSocket(statement);
+		if (response.equals("OK")) {
 			return true;
 		} else {
-			throw new Exception("Not connected");
+			return false;
 		}
 	}
 	

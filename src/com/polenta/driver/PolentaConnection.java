@@ -1,8 +1,10 @@
 package com.polenta.driver;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
@@ -18,10 +20,8 @@ public class PolentaConnection {
 			socket.setKeepAlive(true);
 			connected = true;
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -38,20 +38,31 @@ public class PolentaConnection {
 	//public void getAutoCommit
 	//public PolentaMetaData getMetaData
 	
-	public BufferedReader writeToSocket(String statement) {
+	public String writeToSocket(String statement) {
+		BufferedWriter writer;
+		BufferedReader reader;
+		
 		if (connected) {
 			try {
-				PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-				out.println(statement);
-				out.flush();
+				writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+				reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+				
+				writer.write(statement);
+				writer.newLine();
+				writer.flush();
 				System.out.println("Statement sent.");
-				return null;
+				
+				String response = reader.readLine();
+				System.out.println("Statement result:\n" + response);
+				
+				return response;
 			} catch (IOException e) {
 				e.printStackTrace();
-				return null;
+				return "IO_EXCEPTION";
 			}
 		} else {
-			return null;
+			System.out.println("Not connected.");
+			return "NOT_CONNECTED";
 		}
 		
 	}
