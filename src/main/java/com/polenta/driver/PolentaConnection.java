@@ -2,7 +2,6 @@ package com.polenta.driver;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
@@ -26,9 +25,9 @@ public class PolentaConnection {
 			socket.setKeepAlive(true);
 			connected = true;
 		} catch (java.net.ConnectException ce) {
-			throw new PolentaConnectionException("It was not possible connect to Polenta server on host [" + this.host + "] and port [" + this.port + "].\n");
+			throw new PolentaException("It was not possible connect to Polenta server on host [" + this.host + "] and port [" + this.port + "].\n");
 		} catch (UnknownHostException uhe) {
-			throw new PolentaConnectionException("It was not possible connect to Polenta server on host [" + this.host + "] and port [" + this.port + "].\n");
+			throw new PolentaException("It was not possible connect to Polenta server on host [" + this.host + "] and port [" + this.port + "].\n");
 		}
 	}
 	
@@ -44,27 +43,31 @@ public class PolentaConnection {
 	//public void getAutoCommit
 	//public PolentaMetaData getMetaData
 	
-	public String writeToSocket(String statement) throws PolentaConnectionException, IOException {
+	protected String writeToSocket(String statement) throws PolentaException {
 		BufferedWriter writer;
 		BufferedReader reader;
 		
 		if (this.connected) {
-			writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-			reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			
-			writer.write(statement);
-			writer.newLine();
-			writer.flush();
+			String response = null;
+			try {
+				writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+				reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+				
+				writer.write(statement);
+				writer.newLine();
+				writer.flush();
 
-			String response = reader.readLine();
+				response = reader.readLine();
+			} catch (Exception e) {
+				throw new PolentaException("An error ocurred on communication to PolentaServer. See root cause for details.", e);
+			}
 			if (response == null) {
 				 this.connected = false;
-				 throw new PolentaConnectionException("Connection to server is no longer active.");
+				 throw new PolentaException("Connection to server is no longer active.");
 			}
-			
 			return response;
 		} else {
-			throw new PolentaConnectionException("Connection to server has been closed.");
+			throw new PolentaException("Connection to server has been closed.");
 		}
 		
 	}
