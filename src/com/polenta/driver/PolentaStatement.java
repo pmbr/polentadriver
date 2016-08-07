@@ -1,7 +1,6 @@
 package com.polenta.driver;
 
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
 
 public class PolentaStatement {
 
@@ -11,19 +10,12 @@ public class PolentaStatement {
 		this.connection = connection;
 	}
 	
-	public boolean execute(String statement) throws Exception {
-		String response = connection.writeToSocket(statement);
-		if (response.equals("OK")) {
-			return true;
+	public String execute(String statement) throws IOException, PolentaConnectionException {
+		if (connection.isConnected()) {
+			return connection.writeToSocket(statement);
 		} else {
-			return false;
+			throw new PolentaConnectionException("Connection to server has been closed. Statement cannot be executed"); 
 		}
 	}
-	
-	public List<Map<String, Object>> executeQuery(String statement) throws Exception {
-		throw new Exception("Not implemented");
-	}
-
-	
 	
 }
