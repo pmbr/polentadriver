@@ -1,11 +1,11 @@
 package com.polenta.driver;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Map;
 
 public class PolentaConnection {
 
@@ -13,6 +13,8 @@ public class PolentaConnection {
 	private int port;
 	private Socket socket;
 	private boolean connected;
+	private BufferedWriter writer;
+	private ObjectInputStream reader;
 	
 	PolentaConnection(String host, int port) {
 		this.host = host;
@@ -24,6 +26,9 @@ public class PolentaConnection {
 			socket = new Socket(host, port);
 			socket.setKeepAlive(true);
 			connected = true;
+			
+			writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+			reader = new ObjectInputStream(socket.getInputStream());
 		} catch (java.net.ConnectException ce) {
 			throw new PolentaException("It was not possible connect to Polenta server on host [" + this.host + "] and port [" + this.port + "].\n");
 		} catch (UnknownHostException uhe) {
@@ -43,21 +48,18 @@ public class PolentaConnection {
 	//public void getAutoCommit
 	//public PolentaMetaData getMetaData
 	
-	protected String writeToSocket(String statement) throws PolentaException {
-		BufferedWriter writer;
-		BufferedReader reader;
+	@SuppressWarnings("unchecked")
+	protected Map<String, Object> writeToSocket(String statement) throws PolentaException {
 		
 		if (this.connected) {
-			String response = null;
+			Map<String, Object> response = null;
 			try {
-				writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-				reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 				
 				writer.write(statement);
 				writer.newLine();
 				writer.flush();
 
-				response = reader.readLine();
+				response = (Map<String, Object>)reader.readObject();
 			} catch (Exception e) {
 				throw new PolentaException("An error ocurred on communication to PolentaServer. See root cause for details.", e);
 			}
