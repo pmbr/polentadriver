@@ -1,5 +1,6 @@
 package com.polenta.driver;
 
+import java.util.List;
 import java.util.Map;
 
 public class PolentaStatement {
@@ -31,6 +32,7 @@ public class PolentaStatement {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public PolentaResultSet executeQuery(String statement) throws PolentaException {
 		if (connection.isConnected()) {
 			Map<String, Object> serverResponse = connection.writeToSocket(statement);
@@ -45,10 +47,10 @@ public class PolentaStatement {
 			} else if (!serverResponse.get("STATUS").equals("SUCCESS")) {
 				throw new PolentaException("Received unexpected status from server.");
 			} else {
-				if (!serverResponse.containsKey("RESULT_SET")) {
+				if (!serverResponse.containsKey("FIELDS") && !serverResponse.containsKey("ROWS")) {
 					throw new PolentaException("Received no result set from server.");
 				} else {
-					return new PolentaResultSet((String)serverResponse.get("RESULT_SET"));
+					return new PolentaResultSet((List<String>)serverResponse.get("FIELDS"), (List<Map<String, Object>>)serverResponse.get("ROWS"));
 				}
 			}
 		} else {

@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>polenta</groupId>
 	<artifactId>polentadriver</artifactId>
-	<version>0.0.3-SNAPSHOT</version>
+	<version>0.0.3</version>
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<plugins>
@@ -13,6 +13,14 @@
 				<configuration>
 					<source />
 					<target />
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<outputDirectory>.</outputDirectory>
 				</configuration>
 			</plugin>
 		</plugins>

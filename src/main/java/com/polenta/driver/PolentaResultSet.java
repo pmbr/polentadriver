@@ -1,7 +1,5 @@
 package com.polenta.driver;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -11,34 +9,9 @@ public class PolentaResultSet {
 	private List<Map<String, Object>> rows;
 	private List<String> fields;
 	
-	protected PolentaResultSet(String serverResponse) throws PolentaException {
-		this.rows = new ArrayList<Map<String,Object>>();
-		this.fields = new ArrayList<String>();
-		current = 0;
-		
-		if (!serverResponse.equalsIgnoreCase("EMPTY_RESULT_SET")) {
-			String[] lines = serverResponse.split("\\|");
-			processFields(lines[0]);
-			for (int i = 1; i < lines.length; i++) {
-				processRow(lines[i]);
-			}
-		}
-		
-	}
-	
-	protected void processFields(String line) throws PolentaException {
-		for (String field: line.split(",")) {
-			this.fields.add(field);
-		}
-	}
-
-	protected void processRow(String line) throws PolentaException {
-		Map<String, Object> map = new LinkedHashMap<String, Object>();
-		for (String group: line.split(",")) {
-			String[] subgroup = group.split(":");
-			map.put(subgroup[0], subgroup[1]);
-		}
-		rows.add(map);
+	protected PolentaResultSet(List<String> fields, List<Map<String, Object>> rows) throws PolentaException {
+		this.fields = fields;
+		this.rows = rows;
 	}
 	
 	protected List<String> fields() {
@@ -120,12 +93,12 @@ public class PolentaResultSet {
 	}
 
 	public String toString() {
+		StringBuilder sb = new StringBuilder("");
 		
 		try {
 			if (this.rows == null || this.fields == null || this.fields.isEmpty()) {
 				return "";
 			}
-			StringBuilder sb = new StringBuilder("");
 
 			sb.append("|=====|");
 			for (int i = 0; i < this.fields.size(); i++) {
@@ -159,13 +132,12 @@ public class PolentaResultSet {
 				sb.append("======================|");
 			}
 			sb.append("\n");
-			
-			return sb.toString();
+	
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
-		return "xxx";
+		return sb.toString();
 	}
 	
 	protected String pad(String input) {
